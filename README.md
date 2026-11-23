@@ -68,7 +68,7 @@ which is the ceiling on Meitei scores.
 | **M1** | Transformer from scratch, 61M params (6+6 layers, d=512), own SentencePiece 32k vocab | all 11 languages, both directions | dropout 0.3, label smoothing 0.1, lr 5e-4 inverse-sqrt |
 | **M2** | NLLB-200-distilled-600M, zero-shot | as, lus, mni only (the languages NLLB knows) | no training |
 | **M3** | NLLB-200-distilled-600M fine-tuned | all 11 languages, both directions | Adafactor lr 1e-4, bf16, effective batch 64 |
-| **M4** | NLLB-200-distilled-600M fine-tuned on one language | as, lus, brx, trp (separate models) | same settings as M3 |
+| **M4** | NLLB-200-distilled-600M fine-tuned on one language | as, lus (Cat. I), brx, trp (Cat. II), 4 separate models | same settings as M3; max epochs as 2, lus 2, brx 4, trp 15 so each model sees its language at least as often as M3 did (M3: 1.1 / 1.1 / 3.7 / 15 passes); early stopping on dev |
 
 Shared choices:
 - **Both directions in one model**, with the target-language code as the first decoder token (NLLB format).
@@ -121,21 +121,38 @@ Bold = significantly better than the other systems in that row (95% bootstrap CI
 **Significance:** M3 beats M1 in **18 / 22** directions (3 ties: Tagin both ways, Nyishi→English; 1 loss: Nyishi
 English→Nyishi). M3 beats M2 in **6 / 6** directions.
 
+### One multilingual model (M3) vs one model per language (M4)
+
+| Language (train pairs) | M4 per-language | M3 multilingual | Δ (M3 − M4), 95% CI | Winner |
+|---|---|---|---|---|
+| Assamese (50k) | 39.3 / 50.5 | 38.0 / 50.2 | −1.2 [−1.7, −0.8] / −0.3 [−0.8, 0.2] | **M4** / tie |
+| Mizo (47k) | 46.6 / 49.2 | 45.8 / 48.5 | −0.8 [−1.2, −0.4] / −0.7 [−1.2, −0.1] | **M4** / **M4** |
+| Bodo (11k) | 63.4 / 64.6 | 66.9 / 66.8 | +3.4 [2.9, 4.0] / +2.2 [1.5, 2.8] | **M3** / **M3** |
+| Kokborok (1.8k) | 47.6 / 47.2 | 48.5 / 49.6 | +0.9 [0.1, 1.7] / +2.4 [1.3, 3.4] | **M3** / **M3** |
+
+chrF++, English→X / X→English. COMET into English agrees (Bodo 82.0 vs 80.6, Kokborok 66.7 vs 64.9; Assamese and Mizo within 0.5).
+
 ![M1 vs M3](results/figures/2_scratch_vs_nllb.png)
 ![M2 vs M3](results/figures/3_zeroshot_vs_finetuned.png)
+![M3 vs M4](results/figures/4_bilingual_vs_multilingual.png)
 ![Quality vs data size](results/figures/1_chrf_vs_data_size.png)
 
 ### Findings
 1. **RQ1 — pretraining helps.** Fine-tuned NLLB beats the scratch model by +6 chrF++ on average, most on X→English
    (e.g. Nagamese +10.9, Bodo +11.2, Meitei +10.6), where generating English benefits from NLLB's pretraining.
 2. **RQ2 — fine-tuning helps even known languages.** Manipuri English→X improves from 41.9 (zero-shot) to 56.1.
-3. **RQ4 — data size is not the main driver.** Bodo (11k pairs) scores highest; Nyishi (48k) is among the lowest.
+3. **RQ3 — sharing helps the small languages and costs the large ones a little.** The multilingual model is
+   significantly better for both Category II languages (Bodo +2.2 to +3.4, Kokborok +0.9 to +2.4), which borrow
+   from the other 10 languages. For the two largest languages a dedicated model is slightly better (−0.3 to −1.2):
+   with 47–50k pairs they have enough data of their own, and in M3 they share capacity and are downsampled by
+   temperature sampling. This is the well-known multilingual transfer vs. interference trade-off.
+4. **RQ4 — data size is not the main driver.** Bodo (11k pairs) scores highest; Nyishi (48k) is among the lowest.
    Domain and data style matter more: Nyishi and Tagin are dominated by very short sentences and dictionary entries.
-4. **Where M3 loses.** On Nyishi English→X the scratch model wins (−3.7). M3 saw Nyishi for about 2 epochs (downsampled
+5. **Where M3 loses.** On Nyishi English→X the scratch model wins (−3.7). M3 saw Nyishi for about 2 epochs (downsampled
    by temperature sampling); M1 saw it ~8× more often over 17 epochs. Finishing M3's 3rd epoch is the obvious next step.
-5. **Decoding matters for under-trained languages.** Without repetition blocking M3 looped on 4.4% of Tagin test
+6. **Decoding matters for under-trained languages.** Without repetition blocking M3 looped on 4.4% of Tagin test
    sentences (TER 109); the dev-chosen `no_repeat_ngram_size=4` fixed it (Tagin English→X 27.5 → 31.0).
-6. Scores are **not comparable across languages**: domains differ (Bible vs news) and chrF++ behaves differently across
+7. Scores are **not comparable across languages**: domains differ (Bible vs news) and chrF++ behaves differently across
    scripts. Compare models within a row, not languages within a column.
 
 ## 6. How to run

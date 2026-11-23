@@ -1,0 +1,9 @@
+# WMT26 data is not redistributed (no license on the source page); predictions contain the test references
+Category I/
+Category II/
+data/
+results/predictions/
+checkpoints/
+logs/
+__pycache__/
+.DS_Store

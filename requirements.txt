@@ -1,0 +1,12 @@
+torch>=2.4
+transformers>=4.46,<5
+accelerate>=1.0
+sentencepiece
+protobuf
+sacrebleu>=2.4
+pandas
+openpyxl
+matplotlib
+unbabel-comet>=2.2
+tabulate
+setuptools<81  # pkg_resources, needed by COMET -> torchmetrics

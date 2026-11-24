@@ -6,6 +6,9 @@ We compare a Transformer trained from scratch, zero-shot NLLB-200, and NLLB-200 
 
 Planning document with every design decision and the alternatives considered: [STRATEGY.md](STRATEGY.md).
 
+**Trained models on Hugging Face:** [M3 (main model)](https://huggingface.co/AI-Coder-27/nlp-exp10-m3-nllb600m-11indic) ·
+[all checkpoints](#trained-models).
+
 ## Research questions
 
 | RQ | Question | Compared |
@@ -154,6 +157,24 @@ chrF++, English→X / X→English. COMET into English agrees (Bodo 82.0 vs 80.6,
    sentences (TER 109); the dev-chosen `no_repeat_ngram_size=4` fixed it (Tagin English→X 27.5 → 31.0).
 7. Scores are **not comparable across languages**: domains differ (Bible vs news) and chrF++ behaves differently across
    scripts. Compare models within a row, not languages within a column.
+
+### Trained models
+
+All checkpoints are on the Hugging Face Hub, each with a model card listing its test scores and usage
+(CC-BY-NC-4.0, following the NLLB-200 base model). M2 is the unmodified
+[facebook/nllb-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M).
+
+| Model | Hugging Face repo |
+|---|---|
+| M1 — Transformer from scratch, 11 languages | [AI-Coder-27/nlp-exp10-m1-scratch-transformer-11indic](https://huggingface.co/AI-Coder-27/nlp-exp10-m1-scratch-transformer-11indic) |
+| M3 — NLLB-600M fine-tuned, 11 languages | [AI-Coder-27/nlp-exp10-m3-nllb600m-11indic](https://huggingface.co/AI-Coder-27/nlp-exp10-m3-nllb600m-11indic) |
+| M4 — NLLB-600M, Assamese only | [AI-Coder-27/nlp-exp10-m4-nllb600m-as](https://huggingface.co/AI-Coder-27/nlp-exp10-m4-nllb600m-as) |
+| M4 — NLLB-600M, Mizo only | [AI-Coder-27/nlp-exp10-m4-nllb600m-lus](https://huggingface.co/AI-Coder-27/nlp-exp10-m4-nllb600m-lus) |
+| M4 — NLLB-600M, Bodo only | [AI-Coder-27/nlp-exp10-m4-nllb600m-brx](https://huggingface.co/AI-Coder-27/nlp-exp10-m4-nllb600m-brx) |
+| M4 — NLLB-600M, Kokborok only | [AI-Coder-27/nlp-exp10-m4-nllb600m-trp](https://huggingface.co/AI-Coder-27/nlp-exp10-m4-nllb600m-trp) |
+
+To translate with a downloaded model: `python src/translate.py --model_dir <repo id or local folder> --name out --langs as --split test --no_repeat 4`
+(the NLLB models load straight from the Hub id; for M1 download the folder first, it uses its own `spm.model`).
 
 ## 6. How to run
 

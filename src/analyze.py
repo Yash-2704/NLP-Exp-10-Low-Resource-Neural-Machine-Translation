@@ -16,9 +16,9 @@ R = ROOT / "results"
 FIG = R / "figures"
 FIG.mkdir(parents=True, exist_ok=True)
 
-# deck palette: vermilion (main system), near-black green, warm khaki; warm paper surface
-C1, C2, C3 = "#B4412B", "#2F3B33", "#A89F86"
-INK, INK2, GRID, SURF = "#1C1A17", "#5B554C", "#DDD5C6", "#F4EFE6"
+# deck palette (from the Swaylabs Grey Pitch Deck Figma template): orange-red accent, black, grey; white surface
+C1, C2, C3 = "#FE3E01", "#111111", "#A6A6A6"
+INK, INK2, GRID, SURF = "#000000", "#535353", "#E6E6E6", "#FFFFFF"
 NAMES = {"as": "Assamese", "njz": "Nyishi", "lus": "Mizo", "kha": "Khasi", "mni": "Manipuri",
          "mtei": "Meitei", "brx": "Bodo", "tgj": "Tagin", "trp": "Kokborok", "nag": "Nagamese", "mjw": "Karbi"}
 plt.rcParams.update({"font.size": 11, "axes.edgecolor": GRID, "axes.labelcolor": INK2, "xtick.color": INK2,
